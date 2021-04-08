@@ -10,6 +10,16 @@
 		<welcome-file>index.html</welcome-file>
 	</welcome-file-list>
 
+	<error-page>
+		<error-code>404</error-code>
+		<location>/error/404.html</location>
+	</error-page>
+
+	<error-page>
+		<error-code>500</error-code>
+		<location>/error/500.html</location>
+	</error-page>
+
 	<!-- added servlet -->
 
 	<servlet>
@@ -19,7 +29,7 @@
 
 		<init-param>
 			<param-name>jersey.config.server.provider.packages</param-name>
-			<param-value>pt.unl.fct.di.apdc.firstwebapp.resources</param-value>
+			<param-value>pt.unl.fct.di.apdc.projetoindividual.resources</param-value>
 		</init-param>
 
 		<init-param>
@@ -29,7 +39,7 @@
 
 		<init-param>
 			<param-name>jersey.config.server.provider.classnames</param-name>
-			<param-value>pt.unl.fct.di.apdc.firstwebapp.filters.AdditionalResponseHeadersFilter</param-value>
+			<param-value>pt.unl.fct.di.apdc.projetoindividual.filters.AdditionalResponseHeadersFilter</param-value>
 		</init-param>
 		<init-param>
 			<param-name>jersey.config.servlet.filter.contextPath</param-name>
@@ -42,7 +52,6 @@
 		</init-param>
 		<load-on-startup>1</load-on-startup>
 	</servlet>
-
 
 
 	<servlet-mapping>
