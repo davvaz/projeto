@@ -33,23 +33,34 @@ public class StartupListener implements ServletContextListener {
 				.setKind("User")
 				.newKey("SUPERUSER");		
 		Entity user = txn.get(userKey);
-		
-		user = Entity.newBuilder(userKey)
-		.set("user_email", "superuser@mail.com")
-		.set("user_pwd", DigestUtils.sha512Hex("UltimatePwd123"))
-		.set("user_profile", "PRIVATE")
-		.set("user_phone_number", "219090909")
-		.set("user_mobile_number", "909090909")
-		.set("user_address", "super user address")
-		.set("user_extra_address", "super user extra address")
-		.set("location", "super user location")
-		.set("user_role", "SU")
-		.set("user_state", "ENABLED")
-		.set("user_creation_time", Timestamp.now())
-		.build();
-		
-		txn.add(user);
-		txn.commit();
+		try {
+			
+			if(user != null) {
+				txn.rollback();
+			}
+			if(user == null) {
+				user = Entity.newBuilder(userKey)
+						.set("user_email", "superuser@mail.com")
+						.set("user_pwd", DigestUtils.sha512Hex("UltimatePwd123"))
+						.set("user_profile", "PRIVATE")
+						.set("user_phone_number", "219090909")
+						.set("user_mobile_number", "909090909")
+						.set("user_address", "super user address")
+						.set("user_extra_address", "super user extra address")
+						.set("location", "super user location")
+						.set("user_role", "SU")
+						.set("user_state", "ENABLED")
+						.set("user_creation_time", Timestamp.now())
+						.build();
+						
+						txn.add(user);
+						txn.commit();
+			}
+	
+		}finally {
+			if(txn.isActive())
+				txn.rollback();
+		}
 	}
 
 	@Override
