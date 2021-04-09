@@ -409,7 +409,7 @@ public class UserResource {
 			}
 			
 			if(userEntity.getString("user_role").equals("SU")) {
-				if(data.getRoleToChange().equals("GA") && !updatedUserEntity.getString("user_role").equals("GA")) {
+				if(data.getAttribute().equals("GA") && !updatedUserEntity.getString("user_role").equals("GA")) {
 					Entity updatedUser = Entity.newBuilder(updatedUserEntity)
 							.set("user_role","GA").build();
 					
@@ -418,7 +418,7 @@ public class UserResource {
 					txn.commit();
 					return Response.ok(" {} ").build(); 
 				}
-				if(data.getRoleToChange().equals("GBO") && !updatedUserEntity.getString("user_role").equals("GBO")) {
+				if(data.getAttribute().equals("GBO") && !updatedUserEntity.getString("user_role").equals("GBO")) {
 					Entity updatedUser = Entity.newBuilder(updatedUserEntity)
 							.set("user_role","GBO").build();
 					
@@ -453,9 +453,127 @@ public class UserResource {
 				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
 			}
 		}
-		LOG.warning("Failed update attempt for username: " + data.getUserToChange());
+		LOG.warning("Failed role update attempt for username: " + data.getUserToChange());
 		return Response.status(Status.BAD_REQUEST).entity("ups").build();
 		
+	}
+	
+	
+	@POST
+	@Path("/state/change")
+	@Consumes(MediaType.APPLICATION_JSON)
+	public Response doStateChange(RequestData data) {
+		LOG.warning("Attempt to change role on user: "+ data.getUserToChange());
+		
+		Transaction txn = datastore.newTransaction();
+		Key userKey = datastore.newKeyFactory()
+				.setKind("User")
+				.newKey(data.token.getUsername());
+		Entity userEntity = txn.get(userKey);
+		
+		Key tokenKey = datastore.newKeyFactory()
+				.addAncestor(PathElement.of("User", data.token.getUsername()))
+				.setKind("Token")
+				.newKey(data.token.getTokenID());
+		Entity tokenEntity = txn.get(tokenKey);
+		
+		Key updatedUserKey = datastore.newKeyFactory()
+				.setKind("User")
+				.newKey(data.getUserToChange());
+		Entity updatedUserEntity = txn.get(updatedUserKey);
+		
+		try {
+			
+			if(tokenEntity == null || System.currentTimeMillis() > data.token.getExpirationData()) {
+				txn.rollback();
+				LOG.warning("Token Authentication Failed");
+				return Response.status(Status.FORBIDDEN).build();
+			}
+			
+			if(userEntity.getString("user_role").equals("SU")) {
+				if(data.getAttribute().equals("ENABLED") && !updatedUserEntity.getString("user_state").equals("ENABLED")) {
+					
+					Entity updatedUser = Entity.newBuilder(updatedUserEntity)
+							.set("user_state","ENABLED").build();
+					
+					txn.put(updatedUser);
+					LOG.warning("User state changed to ENABLED");
+					txn.commit();
+					return Response.ok(" {} ").build();
+				}
+				if(data.getAttribute().equals("DISABLED") && !updatedUserEntity.getString("user_state").equals("DISABLED")) {
+					Entity updatedUser = Entity.newBuilder(updatedUserEntity)
+							.set("user_state","DISABLED").build();
+					
+					txn.put(updatedUser);
+					LOG.warning("User state changed to DISABLED");
+					txn.commit();
+					return Response.ok(" {} ").build();
+				}
+			}
+			if(userEntity.getString("user_role").equals("GA")) {
+				if(updatedUserEntity.getString("user_role").equals("USER") || updatedUserEntity.getString("user_role").equals("GBO")) {
+					
+					if(data.getAttribute().equals("ENABLED") && !updatedUserEntity.getString("user_state").equals("ENABLED")) {
+						
+						Entity updatedUser = Entity.newBuilder(updatedUserEntity)
+								.set("user_state","ENABLED").build();
+						
+						txn.put(updatedUser);
+						LOG.warning("User state changed to ENABLED");
+						txn.commit();
+						return Response.ok(" {} ").build();
+					}
+					if(data.getAttribute().equals("DISABLED") && !updatedUserEntity.getString("user_state").equals("DISABLED")) {
+						Entity updatedUser = Entity.newBuilder(updatedUserEntity)
+								.set("user_state","DISABLED").build();
+						
+						txn.put(updatedUser);
+						LOG.warning("User state changed to DISABLED");
+						txn.commit();
+						return Response.ok(" {} ").build();
+					}
+				}
+			}
+			if(userEntity.getString("user_role").equals("GBO")) {
+				if(updatedUserEntity.getString("user_role").equals("USER")) {
+					
+					if(data.getAttribute().equals("ENABLED") && !updatedUserEntity.getString("user_state").equals("ENABLED")) {
+						
+						Entity updatedUser = Entity.newBuilder(updatedUserEntity)
+								.set("user_state","ENABLED").build();
+						
+						txn.put(updatedUser);
+						LOG.warning("User state changed to ENABLED");
+						txn.commit();
+						return Response.ok(" {} ").build();
+					}
+					if(data.getAttribute().equals("DISABLED") && !updatedUserEntity.getString("user_state").equals("DISABLED")) {
+						Entity updatedUser = Entity.newBuilder(updatedUserEntity)
+								.set("user_state","DISABLED").build();
+						
+						txn.put(updatedUser);
+						LOG.warning("User state changed to DISABLED");
+						txn.commit();
+						return Response.ok(" {} ").build();
+					}
+				}
+			}
+			
+			
+		}catch(Exception e) {
+			txn.rollback();
+			LOG.warning("exception "+ e.toString());
+			return Response.status(Status.INTERNAL_SERVER_ERROR).entity(e.toString()).build();
+		}finally {
+			if(txn.isActive()) {
+				txn.rollback();
+				LOG.warning("entered finally");
+				return Response.status(Status.INTERNAL_SERVER_ERROR).build();
+			}
+		}
+		LOG.warning("Failed role update attempt for username: " + data.getUserToChange());
+		return Response.status(Status.BAD_REQUEST).entity("ups").build();
 	}
 	
 }

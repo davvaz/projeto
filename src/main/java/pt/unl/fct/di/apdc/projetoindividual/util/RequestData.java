@@ -6,7 +6,7 @@ public class RequestData {
 	public String userToDelete;
 	public RegisterData userData;
 	public String userToChange;
-	public String roleToChange;
+	public String attribute;
 	
 	public RequestData() {
 		
@@ -15,19 +15,22 @@ public class RequestData {
 	public RequestData(AuthToken token, String userToDelete) {
 		this.token = token;
 		this.userToDelete = userToDelete;
+		//delete
 	}
 	
 	
 	public RequestData(AuthToken token, RegisterData userData) {
 		this.token = token;
 		this.userData = userData;
+		//update
 	}
 	
 	
-	public RequestData(AuthToken token, String userToChange, String roleToChange) {
+	public RequestData(AuthToken token, String userToChange, String attribute) {
 		this.token = token;
 		this.userToChange = userToChange;
-		this.roleToChange = roleToChange;
+		this.attribute = attribute;
+		//role and state
 	}
 
 	public String getUserToChange() {
@@ -38,12 +41,12 @@ public class RequestData {
 		this.userToChange = userToChange;
 	}
 
-	public String getRoleToChange() {
-		return roleToChange;
+	public String getAttribute() {
+		return attribute;
 	}
 
-	public void setRoleToChange(String roleToChange) {
-		this.roleToChange = roleToChange;
+	public void setAttribute(String roleToChange) {
+		this.attribute = roleToChange;
 	}
 
 	public AuthToken getToken() {
@@ -69,7 +72,8 @@ public class RequestData {
 	public void setUserData(RegisterData userData) {
 		this.userData = userData;
 	}
-	
+
+
 	
 	
 }
